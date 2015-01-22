@@ -9,6 +9,7 @@
 #import "SSFBarCodesViewController.h"
 
 #define DEFAULT_QUANTITY @"1"
+#define ROW_HEIGHT 50
 
 @interface SSFBarCodesViewController () <UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate>
 
@@ -32,6 +33,7 @@
 
     // This will remove extra separators from tableview
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
+    self.tableView.rowHeight = ROW_HEIGHT;
 
     self.title = @"BT scanner";
 
@@ -93,10 +95,12 @@
             @"productName" : product,
             @"quantity" : @(quantity),
         }];
+
         [self.quantityTextField resignFirstResponder];
         [self.barCodeTextField becomeFirstResponder];
 
         self.quantityTextField.text = DEFAULT_QUANTITY;
+        self.barCodeTextField.text = @"";
 
         [self.tableView reloadData];
     }
