@@ -8,6 +8,8 @@
 
 #import "SSFBarCodesViewController.h"
 
+#define DEFAULT_QUANTITY @"1"
+
 @interface SSFBarCodesViewController () <UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate>
 
 @property (nonatomic, strong) IBOutlet UITableView *tableView;
@@ -15,7 +17,6 @@
 @property (nonatomic, strong) IBOutlet UITextField *quantityTextField;
 
 @property (nonatomic, strong) NSMutableArray *products;
-@property (nonatomic, strong) NSString *barCode;
 
 @end
 
@@ -27,7 +28,7 @@
 
     _products = [NSMutableArray new];
 
-    self.quantityTextField.text = @"1";
+    self.quantityTextField.text = DEFAULT_QUANTITY;
 
     // This will remove extra separators from tableview
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
@@ -54,6 +55,7 @@
 {
     [self.barCodeTextField resignFirstResponder];
     [self.quantityTextField resignFirstResponder];
+
     self.navigationItem.rightBarButtonItem.enabled = NO;
 }
 
@@ -73,28 +75,28 @@
         if (textField.text.length == 0) {
             return NO;
         }
-        self.barCode = textField.text;
 
         [self.barCodeTextField resignFirstResponder];
         [self.quantityTextField becomeFirstResponder];
     }
     else if (textField == self.quantityTextField) {
         NSInteger quantity = [textField.text integerValue];
+        NSString *barCode = self.barCodeTextField.text;
         // Ensure that the quantity is >= 1 and that the barCode is not empty
-        if (quantity < 1 || self.barCode.length == 0) {
+        if (quantity < 1 || barCode.length == 0) {
             return NO;
         }
 
+        NSString *product = [self lookupProductForBarCode:barCode];
+
+        [self.products addObject:@{
+            @"productName" : product,
+            @"quantity" : @(quantity),
+        }];
         [self.quantityTextField resignFirstResponder];
         [self.barCodeTextField becomeFirstResponder];
 
-        [self.products addObject:@{
-            @"barCode" : self.barCode,
-            @"quantity" : @(quantity),
-        }];
-
-        self.barCode = nil;
-        self.quantityTextField.text = @"1";
+        self.quantityTextField.text = DEFAULT_QUANTITY;
 
         [self.tableView reloadData];
     }
@@ -134,12 +136,19 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SSFBarCodeCell" forIndexPath:indexPath];
 
     NSDictionary *product = self.products[indexPath.row];
-    cell.textLabel.text = product[@"barCode"];
+    cell.textLabel.text = product[@"productName"];
     cell.detailTextLabel.text = [product[@"quantity"] stringValue];
     cell.userInteractionEnabled = NO;
     cell.accessoryType = UITableViewCellAccessoryNone;
 
     return cell;
+}
+
+#pragma mark - Private
+
+- (NSString *)lookupProductForBarCode:(NSString *)barCode
+{
+    return barCode;
 }
 
 @end
