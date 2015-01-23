@@ -19,6 +19,8 @@
 
 @property (nonatomic, strong) NSMutableArray *products;
 
+@property (nonatomic, strong) UIView *inputAccessoryView;
+
 @end
 
 @implementation SSFBarCodesViewController
@@ -28,9 +30,11 @@
     [super viewDidLoad];
 
     _products = [NSMutableArray new];
+    _inputAccessoryView = [[UIView alloc] initWithFrame:CGRectZero];
 
     self.barCodeTextField.clearsOnBeginEditing = YES;
     self.quantityTextField.text = DEFAULT_QUANTITY;
+    self.quantityTextField.inputAccessoryView = self.inputAccessoryView;
 
     // This will remove extra separators from tableview
     self.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectZero];
@@ -41,6 +45,18 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                            target:self
                                                                                            action:@selector(doneButtonPressed)];
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(textFieldBegan:)
+                                                 name:UITextFieldTextDidBeginEditingNotification
+                                               object:nil];
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                 name:UITextFieldTextDidBeginEditingNotification
+                                               object:nil];
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -57,6 +73,19 @@
 {
     [self.barCodeTextField resignFirstResponder];
     [self.quantityTextField resignFirstResponder];
+}
+
+#pragma mark - Notification
+
+- (void)textFieldBegan:(NSNotification *)notif
+{
+    UITextField *textField = [notif object];
+
+    if (textField == self.quantityTextField) {
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            [self forceKeyboard];
+        });
+    }
 }
 
 #pragma mark - UITextFieldDelegate
@@ -144,6 +173,11 @@
 - (NSString *)lookupProductForBarCode:(NSString *)barCode
 {
     return barCode;
+}
+
+- (void)forceKeyboard
+{
+    self.inputAccessoryView.superview.frame = CGRectMake(0, 416, 1024, 352);
 }
 
 @end
