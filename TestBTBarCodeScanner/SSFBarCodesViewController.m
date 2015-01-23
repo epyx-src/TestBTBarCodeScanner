@@ -29,6 +29,7 @@
 
     _products = [NSMutableArray new];
 
+    self.barCodeTextField.clearsOnBeginEditing = YES;
     self.quantityTextField.text = DEFAULT_QUANTITY;
 
     // This will remove extra separators from tableview
@@ -40,7 +41,6 @@
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone
                                                                                            target:self
                                                                                            action:@selector(doneButtonPressed)];
-    self.navigationItem.rightBarButtonItem.enabled = NO;
 }
 
 - (void)viewWillDisappear:(BOOL)animated
@@ -57,18 +57,9 @@
 {
     [self.barCodeTextField resignFirstResponder];
     [self.quantityTextField resignFirstResponder];
-
-    self.navigationItem.rightBarButtonItem.enabled = NO;
 }
 
 #pragma mark - UITextFieldDelegate
-
-- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField
-{
-    self.navigationItem.rightBarButtonItem.enabled = YES;
-
-    return YES;
-}
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField
 {
